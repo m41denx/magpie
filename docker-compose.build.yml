@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: magpie_backend
+    ports:
+      - "20000-20100:20000-20100"
+      - "20000-20100:20000-20100/udp"
+    environment:
+      - PROXY_ENCRYPTION_KEY=${PROXY_ENCRYPTION_KEY:?Set PROXY_ENCRYPTION_KEY in .env}
+
+      - redisUrl=redis://redis:6379
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: magpie_frontend
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    container_name: magpie_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: magpie
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: magpie_redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
