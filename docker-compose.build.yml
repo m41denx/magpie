@@ -23,6 +23,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: magpie_frontend
+    environment:
+      - MAGPIE_API=${MAGPIE_API:?http://localhost:5656/api}
     depends_on:
       - backend
     restart: unless-stopped
